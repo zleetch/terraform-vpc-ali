@@ -9,7 +9,7 @@ terraform {
   required_version = ">= 0.15.0"
 
   cloud {
-    
+    organization = "zleetch"
   }
 }
 
