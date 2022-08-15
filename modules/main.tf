@@ -1,7 +1,9 @@
 locals {
-  env      = terraform.workspace
-  vpc_name = "vpc-${var.vpc_name}-${local.env}"
-  tags     = merge({ Env = local.env, Runby = "terraform" }, var.tag)
+  workspace    = terraform.workspace
+  workspaceEnv = split("-", local.workspace)
+  env          = element(local.workspaceEnv, length(local.workspaceEnv) - 1)
+  vpc_name     = "vpc-${var.vpc_name}-${local.env}"
+  tags         = merge({ Env = local.env, Runby = "terraform" }, var.tag)
 }
 
 resource "alicloud_vpc" "vpc" {
