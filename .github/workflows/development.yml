@@ -33,7 +33,7 @@ jobs:
         id: init
         run: |
           export TF_WORKSPACE="development"
-          terraform init -input=false -backend-config="${{ github.event.repository.name }}-development"
+          terraform init -input=false -backend-config="workspaces { name = ${{ github.event.repository.name }}-development }"
           terraform workspace show
 
       - name: Terraform validate
