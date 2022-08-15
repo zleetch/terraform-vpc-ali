@@ -1,10 +1,3 @@
-locals {
-  pathName      = abspath(path.root)
-  dirs          = split("/", local.pathName)
-  dirName       = element(dirs, length(dirs) - 1)
-  workspaceName = local.dirName + terraform.workspace
-}
-
 terraform {
   required_providers {
     alicloud = {
@@ -16,10 +9,7 @@ terraform {
   required_version = ">= 0.15.0"
 
   cloud {
-    organization = "zleetch"
-    workspaces {
-      name = local.workspaceName
-    }
+    
   }
 }
 
