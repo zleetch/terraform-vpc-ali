@@ -32,8 +32,8 @@ jobs:
       - name: Terraform init
         id: init
         run: |
-          export TF_WORKSPACE="development"
-          terraform init -input=false -backend-config="workspaces { name = ${{ github.event.repository.name }}-development }"
+          export TF_WORKSPACE="${{ github.event.repository.name }}-development"
+          terraform init -input=false
           terraform workspace show
 
       - name: Terraform validate
@@ -44,7 +44,7 @@ jobs:
         id: plan
         if: github.event_name == 'pull_request'
         run: |
-          export TF_WORKSPACE="development"
+          export TF_WORKSPACE="${{ github.event.repository.name }}-development"
           terraform plan -input=false -no-color
         continue-on-error: true
       
@@ -78,5 +78,5 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/development' && github.event_name == 'push'
         run: |
-          export TF_WORKSPACE="development"
+          export TF_WORKSPACE="${{ github.event.repository.name }}-development"
           terraform apply -auto-approve  
