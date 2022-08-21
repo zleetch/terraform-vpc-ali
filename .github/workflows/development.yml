@@ -1,16 +1,16 @@
-name: "Terraform-VPC-Ali-Production"
+name: "Terraform-VPC-Ali-Development"
 
 on:
   pull_request:
     branches:
-      - "main"
+      - "development"
   push:
     branches:
-      - "main"
+      - "development"
 
 jobs:
   terraform:
-    name: "Deploy-Production-Env"
+    name: "Deploy-Development-Env"
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -32,20 +32,24 @@ jobs:
       - name: Terraform init
         id: init
         run: |
-          export TF_WORKSPACE="production"
+          export TF_WORKSPACE="${{ github.event.repository.name }}-development"
           terraform init -input=false
           terraform workspace show
 
+      - name: Terraform validate
+        id: validate
+        run: terraform validate -no-color
+
       - name: Terraform plan
         id: plan
-        if: github.event_name == "pull_request"
+        if: github.event_name == 'pull_request'
         run: |
-          export TF_WORKSPACE="production"
+          export TF_WORKSPACE="${{ github.event.repository.name }}-development"
           terraform plan -input=false -no-color
         continue-on-error: true
       
       - uses: actions/github-script@0.9.0
-        if: github.event_name == "pull_request"
+        if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
@@ -53,6 +57,7 @@ jobs:
           script: |
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>
             \`\`\`${process.env.PLAN}\`\`\`
@@ -67,11 +72,11 @@ jobs:
             })
 
       - name: Terraform Plan Status
-        if: steps.plan.outcome == "failure"
+        if: steps.plan.outcome == 'failure'
         run: exit 1
       
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
         run: |
-          export TF_WORKSPACE="production"
+          export TF_WORKSPACE="${{ github.event.repository.name }}-development"
           terraform apply -auto-approve  
